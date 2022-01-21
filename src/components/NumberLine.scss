@@ -1,0 +1,72 @@
+.numberLineView {
+    display: flex;
+    flex-direction: column;
+    max-width: 100%;
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+}
+
+.numberLineSettings {
+    height: 30px;
+    flex: 0 0 30px;
+}
+
+.numberLineCanvas {
+    max-width: 100%;
+    width: 100%;
+    flex: 1;
+    overflow: auto;
+    background: #eeeeee;
+    position: relative;
+}
+
+.numberLineHeader {
+    height: 20px;
+    flex: 0 0 20px;
+    border-bottom: 2px solid black;
+}
+
+.numberLineHeaderCanvas {
+    position: relative;
+    height: 20px;
+    flex: 0 0 20px;
+    border-bottom: 2px solid black;
+}
+
+.numberLineTick {
+    position: absolute;
+    border-left: 1px solid black;
+    padding-left: 5px;
+    height: 20px;
+    padding-top: 5px;
+    box-sizing: border-box;
+}
+
+.numberLineItems {
+    flex: 1;
+    background: #eeeeee;
+    position: relative;
+}
+
+.numberLineItem {
+    position: absolute;
+    max-width: 265px;
+    display: flex;
+    padding: 4px;
+}
+
+.numberLineItemBullet {
+    width: 8px;
+    height: 8px;
+    flex: 0 0 8px;
+    margin-top: 3px;
+    margin-bottom: 3px;
+    margin-right: 4px;
+    border-radius: 50%;
+    background: black;
+}
+
+.numberLineItem span {
+    flex: 1;
+}
