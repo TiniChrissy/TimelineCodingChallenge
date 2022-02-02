@@ -4,13 +4,13 @@ import { connect } from "react-redux";
 import NumberLineHeader from "./NumberLineHeader";
 import NumberLineItem from "./NumberLineItem";
 
-import immutable, { List } from "immutable";
+import immutable from "immutable";
+import { valueToPixel } from "./selectors";
 
 import calcTextSize from "../utils/calcTextSize";
 import immutableRecords from "../types/immutableRecords";
 
-import { MAX_ITEM_TEXT_WIDTH } from "../constants";
-
+import { BULLET_WIDTH_INCLUDING_MARGIN, MAX_ITEM_TEXT_WIDTH } from "../constants";
 
 import "../styles/base.scss";
 import "./NumberLine.scss";
@@ -77,41 +77,33 @@ const mapStateToProps = (state) => {
   const unitsPerPixel = state.unitsPerPixel;
   const tickSpacing = getHeaderTickSpacing(unitsPerPixel);
 
-  // Task 1: modify to calculate a correct height
   const itemsAsMap = [...state.items.entries()]
   console.log(itemsAsMap);
 
-  let items = immutable.List()
-
-
-  itemsAsMap.forEach((values, key) => {
-
+  let items = immutable.List()  //Seems kind of dodgy that I'm trying to do something immutable on a variable that is mutable
+  itemsAsMap.forEach((values) => {
     const record = values[1]
-    // console.log(values)
-
     const {id, label, value} = record
-    // const id = record.id
-    // const id = record[1]
-    // const id = record[1]
+    console.log(value)
 
+    const {width, height} = calcTextSize(label, MAX_ITEM_TEXT_WIDTH) 
+    const finalWidth = width + BULLET_WIDTH_INCLUDING_MARGIN
+    console.log(`width: ${finalWidth}, height: ${height}`)
 
-    // console.log(id)
-    // console.log(label)
-    // console.log(value)
     const actualNumberLineItemRecord = immutableRecords.ItemDisplayRecord({
       id,
       label,
       value,
-      width: 100,
-      height: 14,
-      left: 40,
-      top: 14
+      width: finalWidth,
+      height,
+      left: valueToPixel(value, unitsPerPixel),
+      top,// valueToPixel(height, unitsPerPixel)
     })
     console.log(actualNumberLineItemRecord)
     items = items.push(actualNumberLineItemRecord)
-    
    })
   
+  // Task 1: modify to calculate a correct height
   const height = 400
 
   console.log(items)
