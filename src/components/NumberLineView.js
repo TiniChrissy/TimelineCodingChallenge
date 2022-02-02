@@ -3,8 +3,14 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import NumberLineHeader from "./NumberLineHeader";
 import NumberLineItem from "./NumberLineItem";
-import immutable from "immutable";
+
+import immutable, { List } from "immutable";
+
+import calcTextSize from "../utils/calcTextSize";
 import immutableRecords from "../types/immutableRecords";
+
+import { MAX_ITEM_TEXT_WIDTH } from "../constants";
+
 
 import "../styles/base.scss";
 import "./NumberLine.scss";
@@ -66,24 +72,49 @@ const NumberLineView = props => {
 
 const mapStateToProps = (state) => {
   // Task 1: Modify to derive items from redux store ("state" parameter)
-  const items = immutable.List([
-    immutableRecords.ItemDisplayRecord({
-      id: "a",
-      label: "This is an example",
-      value: 5,
+  console.log(state)
+  // Need to modify the width of each of these items
+  const unitsPerPixel = state.unitsPerPixel;
+  const tickSpacing = getHeaderTickSpacing(unitsPerPixel);
+
+  // Task 1: modify to calculate a correct height
+  const itemsAsMap = [...state.items.entries()]
+  console.log(itemsAsMap);
+
+  let items = immutable.List()
+
+
+  itemsAsMap.forEach((values, key) => {
+
+    const record = values[1]
+    // console.log(values)
+
+    const {id, label, value} = record
+    // const id = record.id
+    // const id = record[1]
+    // const id = record[1]
+
+
+    // console.log(id)
+    // console.log(label)
+    // console.log(value)
+    const actualNumberLineItemRecord = immutableRecords.ItemDisplayRecord({
+      id,
+      label,
+      value,
       width: 100,
       height: 14,
       left: 40,
       top: 14
     })
-  ]);
+    console.log(actualNumberLineItemRecord)
+    items = items.push(actualNumberLineItemRecord)
+    
+   })
+  
+  const height = 400
 
-  const unitsPerPixel = state.unitsPerPixel;
-  const tickSpacing = getHeaderTickSpacing(unitsPerPixel);
-
-  // Task 1: modify to calculate a correct height
-  const height = 40;
-
+  console.log(items)
   return {
       items,
       unitsPerPixel,
