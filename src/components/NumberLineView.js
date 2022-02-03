@@ -81,14 +81,20 @@ const mapStateToProps = (state) => {
   console.log(itemsAsMap);
 
   let items = immutable.List()  //Seems kind of dodgy that I'm trying to do something immutable on a variable that is mutable
-  itemsAsMap.forEach((values) => {
+  let usedUpXSpace = []
+  let allX = []
+  itemsAsMap.forEach((values, keys) => {
     const record = values[1]
     const {id, label, value} = record
-    console.log(value)
-
+    // console.log(`${keys}, ${values}`)
+    console.log(values)
     const {width, height} = calcTextSize(label, MAX_ITEM_TEXT_WIDTH) 
     const finalWidth = width + BULLET_WIDTH_INCLUDING_MARGIN
-    console.log(`width: ${finalWidth}, height: ${height}`)
+    // console.log(`width: ${finalWidth}, height: ${height}`)
+
+    const xCoordinate = valueToPixel(value, unitsPerPixel)
+
+    // const previous = 
 
     const actualNumberLineItemRecord = immutableRecords.ItemDisplayRecord({
       id,
@@ -96,17 +102,26 @@ const mapStateToProps = (state) => {
       value,
       width: finalWidth,
       height,
-      left: valueToPixel(value, unitsPerPixel),
-      top,// valueToPixel(height, unitsPerPixel)
+      left:xCoordinate,
+      top: 0//items.last(0).height //20// valueToPixel(height, unitsPerPixel)
     })
-    console.log(actualNumberLineItemRecord)
+    console.log(finalWidth)
     items = items.push(actualNumberLineItemRecord)
+    // console.log(items.last().height)
+    usedUpXSpace.push([xCoordinate, xCoordinate+finalWidth])
+    allX.push(xCoordinate)
    })
+
+   while (!(nextItem = items.next())) {
+    const element = nextItem.value;
+    console.log(element);
+  }
   
   // Task 1: modify to calculate a correct height
   const height = 400
 
   console.log(items)
+  console.log(usedUpXSpace)
   return {
       items,
       unitsPerPixel,
@@ -115,6 +130,14 @@ const mapStateToProps = (state) => {
   };
 };
 
+
+const overlap = (leftSide, rightSide, start) => {
+  if (leftSide < start && start < rightSide) {
+    return true
+  }
+  return false
+
+}
 const mapDispatchToProps = (dispatch) => {
   return {
     onChangeScale: scale => {
