@@ -19,7 +19,6 @@ import actions from "../actions";
 import { MIN_HEADER_TICK_SPACING, VERTICAL_ITEM_SPACING } from "../constants";
 
 const NumberLineView = props => {
-
   // Convert the passed in props.items into NumberLineItem
   // and also calculate the maximumValue so we know how far
   // to render the header.
@@ -72,30 +71,27 @@ const NumberLineView = props => {
 
 const mapStateToProps = (state) => {
   // Task 1: Modify to derive items from redux store ("state" parameter)
-  console.log(state)
+  // console.log(state)
   // Need to modify the width of each of these items
   const unitsPerPixel = state.unitsPerPixel;
   const tickSpacing = getHeaderTickSpacing(unitsPerPixel);
 
   const itemsAsMap = [...state.items.entries()]
-  console.log(itemsAsMap);
+  // console.log(itemsAsMap);
 
   let items = immutable.List()  //Seems kind of dodgy that I'm trying to do something immutable on a variable that is mutable
   let usedUpXSpace = []
   let allX = []
-  itemsAsMap.forEach((values, keys) => {
+  itemsAsMap.forEach((values) => {
     const record = values[1]
     const {id, label, value} = record
     // console.log(`${keys}, ${values}`)
-    console.log(values)
+    // console.log(values)
     const {width, height} = calcTextSize(label, MAX_ITEM_TEXT_WIDTH) 
     const finalWidth = width + BULLET_WIDTH_INCLUDING_MARGIN
     // console.log(`width: ${finalWidth}, height: ${height}`)
 
     const xCoordinate = valueToPixel(value, unitsPerPixel)
-
-    // const previous = 
-
     const actualNumberLineItemRecord = immutableRecords.ItemDisplayRecord({
       id,
       label,
@@ -105,23 +101,55 @@ const mapStateToProps = (state) => {
       left:xCoordinate,
       top: 0//items.last(0).height //20// valueToPixel(height, unitsPerPixel)
     })
-    console.log(finalWidth)
+    // console.log(finalWidth)
     items = items.push(actualNumberLineItemRecord)
     // console.log(items.last().height)
-    usedUpXSpace.push([xCoordinate, xCoordinate+finalWidth])
+    // usedUpXSpace.push([xCoordinate, xCoordinate+finalWidth])
     allX.push(xCoordinate)
    })
 
-   while (!(nextItem = items.next())) {
-    const element = nextItem.value;
-    console.log(element);
-  }
+  //  while (!(nextItem = items.next())) {
+  //   const element = nextItem.value;
+  //   console.log(element);
+  // }
   
+  let returnItems = immutable.List()
+  let bbb = items.sort((a, b) => {
+    if (a.value < b.value) { return -1; }
+    if (a.value > b.value) { return 1; }
+    if (a.value === b.value) { return 0; }
+  });
+
+  bbb.forEach(item => {
+    console.log(item.value)
+  })
+
+  let previous
+  let previousXAndWidth = 0
+  bbb.forEach((item, index) => {
+    console.log(`current item: ${index + 1}`)
+    if (item.left <= previousXAndWidth) {
+      console.log(`Previous x coordinate`)
+      const newItem = item.set('top', (previous.top + previous.height + VERTICAL_ITEM_SPACING))
+      returnItems = returnItems.push(newItem)
+      console.log(`This is the new y coordinate: ${newItem.top}`)
+      previous = newItem
+    } else {
+      returnItems = returnItems.push(item)
+      console.log(`default y coordinate: ${item.top}`)
+      previous = item
+    }
+    previousXAndWidth = previous.left + previous.width
+  })
+
+  returnItems.forEach(item => {
+    console.log(item.top)
+  })
+
   // Task 1: modify to calculate a correct height
   const height = 400
 
-  console.log(items)
-  console.log(usedUpXSpace)
+  items = immutable.List(returnItems)
   return {
       items,
       unitsPerPixel,
@@ -130,14 +158,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-
-const overlap = (leftSide, rightSide, start) => {
-  if (leftSide < start && start < rightSide) {
-    return true
-  }
-  return false
-
-}
 const mapDispatchToProps = (dispatch) => {
   return {
     onChangeScale: scale => {
