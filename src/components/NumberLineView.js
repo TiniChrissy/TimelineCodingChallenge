@@ -71,26 +71,19 @@ const NumberLineView = props => {
 
 const mapStateToProps = (state) => {
   // Task 1: Modify to derive items from redux store ("state" parameter)
-  // console.log(state)
   // Need to modify the width of each of these items
   const unitsPerPixel = state.unitsPerPixel;
   const tickSpacing = getHeaderTickSpacing(unitsPerPixel);
 
   const itemsAsMap = [...state.items.entries()]
-  // console.log(itemsAsMap);
 
   let items = immutable.List()  //Seems kind of dodgy that I'm trying to do something immutable on a variable that is mutable
-  let usedUpXSpace = []
-  let allX = []
+
   itemsAsMap.forEach((values) => {
     const record = values[1]
     const {id, label, value} = record
-    // console.log(`${keys}, ${values}`)
-    // console.log(values)
     const {width, height} = calcTextSize(label, MAX_ITEM_TEXT_WIDTH) 
     const finalWidth = width + BULLET_WIDTH_INCLUDING_MARGIN
-    // console.log(`width: ${finalWidth}, height: ${height}`)
-
     const xCoordinate = valueToPixel(value, unitsPerPixel)
     const actualNumberLineItemRecord = immutableRecords.ItemDisplayRecord({
       id,
@@ -99,19 +92,10 @@ const mapStateToProps = (state) => {
       width: finalWidth,
       height,
       left:xCoordinate,
-      top: 0//items.last(0).height //20// valueToPixel(height, unitsPerPixel)
+      top: 0
     })
-    // console.log(finalWidth)
     items = items.push(actualNumberLineItemRecord)
-    // console.log(items.last().height)
-    // usedUpXSpace.push([xCoordinate, xCoordinate+finalWidth])
-    allX.push(xCoordinate)
    })
-
-  //  while (!(nextItem = items.next())) {
-  //   const element = nextItem.value;
-  //   console.log(element);
-  // }
   
   let returnItems = immutable.List()
   let bbb = items.sort((a, b) => {
@@ -121,33 +105,37 @@ const mapStateToProps = (state) => {
   });
 
   bbb.forEach(item => {
-    console.log(item.value)
+    // console.log(item.value)
   })
 
+  //Calculations for x coordinate
   let previous
   let previousXAndWidth = 0
-  bbb.forEach((item, index) => {
-    console.log(`current item: ${index + 1}`)
+  let maxTop = 0
+  let maxTopHeight = 0
+  bbb.forEach(item => {
+    // console.log(`current item: ${index + 1}`)
     if (item.left <= previousXAndWidth) {
-      console.log(`Previous x coordinate`)
+      // console.log(`Previous x coordinate`)
       const newItem = item.set('top', (previous.top + previous.height + VERTICAL_ITEM_SPACING))
       returnItems = returnItems.push(newItem)
-      console.log(`This is the new y coordinate: ${newItem.top}`)
+      // console.log(`This is the new y coordinate: ${newItem.top}`)
       previous = newItem
     } else {
       returnItems = returnItems.push(item)
-      console.log(`default y coordinate: ${item.top}`)
+      // console.log(`default y coordinate: ${item.top}`)
       previous = item
     }
     previousXAndWidth = previous.left + previous.width
-  })
 
-  returnItems.forEach(item => {
-    console.log(item.top)
+    if (previous.top > maxTop) {
+      maxTop = previous.top
+      maxTopHeight = previous.height
+    }
   })
 
   // Task 1: modify to calculate a correct height
-  const height = 400
+  const height = maxTop + maxTopHeight + VERTICAL_ITEM_SPACING
 
   items = immutable.List(returnItems)
   return {
