@@ -1,22 +1,19 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
+import immutable from "immutable";
+
 import NumberLineHeader from "./NumberLineHeader";
 import NumberLineItem from "./NumberLineItem";
 
-import immutable from "immutable";
-import { valueToPixel } from "./selectors";
-
+import { valueToPixel , getHeaderTickSpacing } from "./selectors";
+import actions from "../actions";
+import { BULLET_WIDTH_INCLUDING_MARGIN, MAX_ITEM_TEXT_WIDTH , MIN_HEADER_TICK_SPACING, VERTICAL_ITEM_SPACING } from "../constants";
 import calcTextSize from "../utils/calcTextSize";
 import immutableRecords from "../types/immutableRecords";
 
-import { BULLET_WIDTH_INCLUDING_MARGIN, MAX_ITEM_TEXT_WIDTH } from "../constants";
-
 import "../styles/base.scss";
 import "./NumberLine.scss";
-import { getHeaderTickSpacing } from "./selectors";
-import actions from "../actions";
-import { MIN_HEADER_TICK_SPACING, VERTICAL_ITEM_SPACING } from "../constants";
 
 const NumberLineView = props => {
   // Convert the passed in props.items into NumberLineItem
@@ -98,36 +95,41 @@ const mapStateToProps = (state) => {
    })
   
   let returnItems = immutable.List()
-  let bbb = items.sort((a, b) => {
+  let sortedItems = items.sort((a, b) => {
     if (a.value < b.value) { return -1; }
     if (a.value > b.value) { return 1; }
     if (a.value === b.value) { return 0; }
   });
-
-  bbb.forEach(item => {
-    // console.log(item.value)
-  })
 
   //Calculations for x coordinate
   let previous
   let previousXAndWidth = 0
   let maxTop = 0
   let maxTopHeight = 0
-  bbb.forEach(item => {
-    // console.log(`current item: ${index + 1}`)
-    if (item.left <= previousXAndWidth) {
-      // console.log(`Previous x coordinate`)
+
+  let nextEmptySpaceAtZeroY = 0
+  sortedItems.forEach(item => {
+    //Bring item to top if possible
+    if(item.left > nextEmptySpaceAtZeroY) {
+      returnItems = returnItems.push(item)
+      previous = item
+      nextEmptySpaceAtZeroY = item.left + item.width
+    }
+
+    else if (item.left <= previousXAndWidth) {
+      if(previous.height >= item.height) {}
+      //after the max pixel value has reached on the x scale, you can bring something back to y = 0 again
       const newItem = item.set('top', (previous.top + previous.height + VERTICAL_ITEM_SPACING))
       returnItems = returnItems.push(newItem)
-      // console.log(`This is the new y coordinate: ${newItem.top}`)
       previous = newItem
-    } else {
-      returnItems = returnItems.push(item)
-      // console.log(`default y coordinate: ${item.top}`)
-      previous = item
-    }
+    } 
+    // else {
+    //   returnItems = returnItems.push(item)
+    //   previous = item
+    // }
     previousXAndWidth = previous.left + previous.width
 
+    // Search for max depth/top and height for dynamic canvas size
     if (previous.top > maxTop) {
       maxTop = previous.top
       maxTopHeight = previous.height
