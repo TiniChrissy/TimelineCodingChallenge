@@ -76,12 +76,11 @@ const mapStateToProps = (state) => {
 
   const itemsAsMap = [...state.items.entries()]
 
-  let items = immutable.List()  //Seems kind of dodgy that I'm trying to do something immutable on a variable that is mutable
+  let extractedItems = immutable.List()  //Seems kind of dodgy that I'm trying to do something immutable on a variable that is mutable
 
   let maxHeight = 0
   itemsAsMap.forEach((values) => {
-    const record = values[1]
-    const {id, label, value} = record
+    const {id, label, value} = values[1]
     const {width, height} = calcTextSize(label, MAX_ITEM_TEXT_WIDTH) 
 
     if (height > maxHeight) {
@@ -89,7 +88,7 @@ const mapStateToProps = (state) => {
     }
     const finalWidth = width + BULLET_WIDTH_INCLUDING_MARGIN
     const xCoordinate = valueToPixel(value, unitsPerPixel)
-    const actualNumberLineItemRecord = immutableRecords.ItemDisplayRecord({
+    const numberLineItem = immutableRecords.ItemDisplayRecord({
       id,
       label,
       value,
@@ -98,11 +97,12 @@ const mapStateToProps = (state) => {
       left:xCoordinate,
       top: 0
     })
-    items = items.push(actualNumberLineItemRecord)
+    extractedItems = extractedItems.push(numberLineItem)
    })
   
-  let returnItems = immutable.List()
-  let sortedItems = items.sort((a, b) => {
+  
+  //Sort list by lowest to highest number value
+  let sortedItems = extractedItems.sort((a, b) => {
     if (a.value < b.value) { return -1; }
     if (a.value > b.value) { return 1; }
     if (a.value === b.value) { return 0; }
@@ -115,6 +115,8 @@ const mapStateToProps = (state) => {
   let maxTopHeight = 0
   let nextEmptySpaceAtZeroY = 0
 
+  let returnItems = immutable.List()
+  //Need to calculate the correct 'top' (y coordinate) of each item
   sortedItems.forEach(item => {
     //Bring item to top if possible
     if(item.left > nextEmptySpaceAtZeroY) {
@@ -140,7 +142,7 @@ const mapStateToProps = (state) => {
   // Task 1: modify to calculate a correct height
   const height = maxTop + maxTopHeight + VERTICAL_ITEM_SPACING
 
-  items = immutable.List(returnItems)
+  const items = immutable.List(returnItems)
   return {
       items,
       unitsPerPixel,

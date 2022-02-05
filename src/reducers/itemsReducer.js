@@ -40,8 +40,6 @@ const reducer = (state = Map(), action) => {
         console.log(itemsAsMap)
         console.log(action.id)
         let a = state.delete(action.id)
-
-        
         console.log("After delete")
         console.log( [...a.entries()])
         return a
