@@ -56,6 +56,19 @@
     padding: 4px;
 }
 
+.numberLineItem {
+    position: absolute;
+    max-width: 265px;
+    display: flex;
+    padding: 4px;
+
+    &:hover {
+    border-style: solid;
+    border-width: 1px;
+    }
+}
+
+
 .numberLineItemBullet {
     width: 8px;
     height: 8px;

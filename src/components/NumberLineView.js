@@ -29,7 +29,8 @@ const NumberLineView = props => {
       left={it.left} 
       width={it.width} 
       top={it.top} 
-      label={it.label} />;
+      label={it.label} 
+    />;
   });
   maximumValue += props.tickSpacing;
 
@@ -58,8 +59,9 @@ const NumberLineView = props => {
       </div>
       <div className="numberLineCanvas">
         <NumberLineHeader maximum={maximumValue} unitsPerPixel={props.unitsPerPixel} tickSpacing={props.tickSpacing} onChangeScale={props.onChangeScale} />
-        <div className="numberLineItems" style={itemsStyle}>
-            {itemComponents}
+        {/* <div className="numberLineItems" style={itemsStyle} onClick={e => props.onDelete(e.target)}> */}
+        <div className="numberLineItems" style={itemsStyle} >
+            {itemComponents} 
         </div>
       </div>
     </div>
@@ -76,10 +78,15 @@ const mapStateToProps = (state) => {
 
   let items = immutable.List()  //Seems kind of dodgy that I'm trying to do something immutable on a variable that is mutable
 
+  let maxHeight = 0
   itemsAsMap.forEach((values) => {
     const record = values[1]
     const {id, label, value} = record
     const {width, height} = calcTextSize(label, MAX_ITEM_TEXT_WIDTH) 
+
+    if (height > maxHeight) {
+      maxHeight = height
+    }
     const finalWidth = width + BULLET_WIDTH_INCLUDING_MARGIN
     const xCoordinate = valueToPixel(value, unitsPerPixel)
     const actualNumberLineItemRecord = immutableRecords.ItemDisplayRecord({
@@ -108,6 +115,9 @@ const mapStateToProps = (state) => {
   let maxTopHeight = 0
 
   let nextEmptySpaceAtZeroY = 0
+
+  //every chunk of max height, need to get the next empty space at this y coordinate. 
+  //if there's a max height i could do this for every chunk of y. so every height pixels this needs to be checked. 
   sortedItems.forEach(item => {
     //Bring item to top if possible
     if(item.left > nextEmptySpaceAtZeroY) {
@@ -117,7 +127,7 @@ const mapStateToProps = (state) => {
     }
 
     else if (item.left <= previousXAndWidth) {
-      if(previous.height >= item.height) {}
+      // if(previous.height >= item.height) {}
       //after the max pixel value has reached on the x scale, you can bring something back to y = 0 again
       const newItem = item.set('top', (previous.top + previous.height + VERTICAL_ITEM_SPACING))
       returnItems = returnItems.push(newItem)
@@ -152,8 +162,15 @@ const mapDispatchToProps = (dispatch) => {
   return {
     onChangeScale: scale => {
       dispatch(actions.changeScale(scale));
-    }
+      
+    },
+    // onDelete: idk => {
+      // dispatch(actions.deleteItem(idk))
+    //   console.log("dispatch tried to call delete item")
+    // }
+
   };
+
 };
 
 NumberLineView.propTypes = {
@@ -161,7 +178,8 @@ NumberLineView.propTypes = {
   tickSpacing: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
   items: PropTypes.any.isRequired,
-  onChangeScale: PropTypes.func.isRequired
+  onChangeScale: PropTypes.func.isRequired,
+  // onDelete: PropTypes.func.isRequired
 };
 
 export default connect(

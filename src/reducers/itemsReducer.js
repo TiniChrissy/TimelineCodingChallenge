@@ -35,6 +35,17 @@ const reducer = (state = Map(), action) => {
       case actionTypes.EDIT_POSITION: {
         return state.setIn([action.id, "label"], action.position);
       }
+      case actionTypes.DELETE_ITEM: {
+        const itemsAsMap = [...state.entries()]
+        console.log(itemsAsMap)
+        console.log(action.id)
+        let a = state.delete(action.id)
+
+        
+        console.log("After delete")
+        console.log( [...a.entries()])
+        return a
+      }
       default:
         return state;
     }
