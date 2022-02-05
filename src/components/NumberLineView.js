@@ -113,25 +113,18 @@ const mapStateToProps = (state) => {
   let previousXMaxWidth = 0
   let maxTop = 0
   let maxTopHeight = 0
-  let nextEmptySpaceAtZeroY = 0
 
   let returnItems = immutable.List()
   //Need to calculate the correct 'top' (y coordinate) of each item
   sortedItems.forEach(item => {
-    //Bring item to top if possible
-    if(item.left > nextEmptySpaceAtZeroY) {
-      nextEmptySpaceAtZeroY = item.left + item.width
-    }
-    
-    //Otherwise the item needs to cascade down. 
-    else if (item.left <= previousXMaxWidth) {
+    // If item's x coordinates overlap with previous item's x coordinates then it must cascade under
+    if (item.left <= previousXMaxWidth) {
       item = item.set('top', (previous.top + previous.height + VERTICAL_ITEM_SPACING))
-    } 
-
+    }
     previous = item
     returnItems = returnItems.push(item)
     previousXMaxWidth = previous.left + previous.width
-
+  
     // Search for max depth/top and height for dynamic canvas size
     if (previous.top > maxTop) {
       maxTop = previous.top
