@@ -110,34 +110,25 @@ const mapStateToProps = (state) => {
 
   //Calculations for x coordinate
   let previous
-  let previousXAndWidth = 0
+  let previousXMaxWidth = 0
   let maxTop = 0
   let maxTopHeight = 0
-
   let nextEmptySpaceAtZeroY = 0
 
-  //every chunk of max height, need to get the next empty space at this y coordinate. 
-  //if there's a max height i could do this for every chunk of y. so every height pixels this needs to be checked. 
   sortedItems.forEach(item => {
     //Bring item to top if possible
     if(item.left > nextEmptySpaceAtZeroY) {
-      returnItems = returnItems.push(item)
-      previous = item
       nextEmptySpaceAtZeroY = item.left + item.width
     }
-
-    else if (item.left <= previousXAndWidth) {
-      // if(previous.height >= item.height) {}
-      //after the max pixel value has reached on the x scale, you can bring something back to y = 0 again
-      const newItem = item.set('top', (previous.top + previous.height + VERTICAL_ITEM_SPACING))
-      returnItems = returnItems.push(newItem)
-      previous = newItem
+    
+    //Otherwise the item needs to cascade down. 
+    else if (item.left <= previousXMaxWidth) {
+      item = item.set('top', (previous.top + previous.height + VERTICAL_ITEM_SPACING))
     } 
-    // else {
-    //   returnItems = returnItems.push(item)
-    //   previous = item
-    // }
-    previousXAndWidth = previous.left + previous.width
+
+    previous = item
+    returnItems = returnItems.push(item)
+    previousXMaxWidth = previous.left + previous.width
 
     // Search for max depth/top and height for dynamic canvas size
     if (previous.top > maxTop) {
